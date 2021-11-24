@@ -131,6 +131,8 @@ static GLuint CreateShader(GLenum type, const char* sourceText)
 
 void RenderAPI_OpenGLCoreES::CreateResources()
 {
+	while (glGetError() != GL_NO_ERROR) {}
+
 	// Create shaders
 	if (m_APIType == kUnityGfxRendererOpenGLES20)
 	{
