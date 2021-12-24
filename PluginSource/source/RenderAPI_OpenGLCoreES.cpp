@@ -12,7 +12,7 @@
 #if UNITY_IOS || UNITY_TVOS
 #	include <OpenGLES/ES2/gl.h>
 #elif UNITY_ANDROID || UNITY_WEBGL || UNITY_EMBEDDED_LINUX
-#	include <GLES2/gl2.h>
+#	include <GLES3/gl3.h> //<GLES2/gl2.h>
 #elif UNITY_OSX
 #	include <OpenGL/gl3.h>
 #elif UNITY_WIN
@@ -280,7 +280,13 @@ void RenderAPI_OpenGLCoreES::EndModifyTexture(void* textureHandle, int textureWi
 void* RenderAPI_OpenGLCoreES::BeginModifyVertexBuffer(void* bufferHandle, size_t* outBufferSize)
 {
 #	if SUPPORT_OPENGL_ES
-	return 0;
+// 	return 0;
+	glBindBuffer(GL_ARRAY_BUFFER, (GLuint)(size_t)bufferHandle);
+	GLint size = 0;
+	glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	*outBufferSize = size;
+	void* mapped = glMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT);
+	return mapped;
 #	else
 	glBindBuffer(GL_ARRAY_BUFFER, (GLuint)(size_t)bufferHandle);
 	GLint size = 0;
@@ -295,6 +301,9 @@ void* RenderAPI_OpenGLCoreES::BeginModifyVertexBuffer(void* bufferHandle, size_t
 void RenderAPI_OpenGLCoreES::EndModifyVertexBuffer(void* bufferHandle)
 {
 #	if !SUPPORT_OPENGL_ES
+ 	glBindBuffer(GL_ARRAY_BUFFER, (GLuint)(size_t)bufferHandle);
+ 	glUnmapBuffer(GL_ARRAY_BUFFER);
+ #	else
 	glBindBuffer(GL_ARRAY_BUFFER, (GLuint)(size_t)bufferHandle);
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 #	endif
